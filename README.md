@@ -2,72 +2,67 @@
 
 The Conntrack Wizard simplifies conntrack command execution, offering an interactive interface for users to effortlessly manage and analyze connection tracking data. With source and destination input, diverse conntrack commands, and output storage, it enhances efficiency in monitoring and manipulating connection tracking information.
 
-
-Let's break down the "Conntrack Wizard" script step by step:
+Let's break down the "ConntrackWizard.py" script step by step:
 
 Import Necessary Modules:
 
+python
+Copy code
 import subprocess
 import os
-These modules are used for running shell commands and interacting with the operating system.
+These modules are used for running shell commands and handling the file system.
 
-Define Execution Function:
+User Input for IP Addresses:
 
-def execute_conntrack(command):
-    try:
-        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        return f"Error: {e.stderr}"
-A function to execute the conntrack command and capture its output or handle errors.
+python
+Copy code
+src_ip = input("Enter source IP address: ")
+dst_ip = input("Enter destination IP address: ")
+The script prompts the user to enter the source and destination IP addresses.
 
-Define Save to File Function:
+Construct File Name:
 
-def save_to_file(filename, content):
-    with open(filename, 'w') as file:
-        file.write(content)
-A function to save content to a file.
+python
+Copy code
+filename = f"/var/conntrack_{src_ip}_{dst_ip}.capture"
+Constructs a filename based on the provided source and destination IP addresses.
 
-Define User Input Function:
+Conntrack Command Construction:
 
-def get_user_input(prompt):
-    return input(prompt).strip()
-A function to get user input with a prompt.
+python
+Copy code
+conntrack_command = [
+    "conntrack", "-L",  # List conntrack table
+    "--src", src_ip,  # Set source IP
+    "--dst", dst_ip,  # Set destination IP
+    "--output", "xml",  # Output format
+]
+Constructs the conntrack command with options based on user input.
 
-Define Main Function:
+Execute Conntrack Command:
 
-def main():
-    # Get user input for source and destination IP addresses
-    src_ip = get_user_input("Enter source IP address: ")
-    dst_ip = get_user_input("Enter destination IP address: ")
+python
+Copy code
+result = subprocess.run(conntrack_command, stdout=subprocess.PIPE, text=True)
+Executes the conntrack command, capturing the output.
 
-    # Construct the filename
-    filename = f"/var/conntrack_{src_ip}_{dst_ip}.capture"
+Write to File:
 
-    while True:
-        # Display Conntrack menu
-        print("\nConntrack Menu:")
-        # (Options 1-10 and Exit)
-        choice = get_user_input("Enter your choice (0-10): ")
-        # Get additional parameters/options based on the chosen command
-        additional_options = get_user_input("Enter additional parameters/options (if any): ")
+python
+Copy code
+with open(filename, "w") as file:
+    file.write(result.stdout)
+Writes the conntrack information to a file with the constructed filename.
 
-        # Construct the Conntrack command
-        conntrack_command = f"conntrack -{choice} -s {src_ip} -d {dst_ip} {additional_options}"
+Display File Path:
 
-        # Execute Conntrack command
-        result = execute_conntrack(conntrack_command)
+python
+Copy code
+print(f"Conntrack information saved to: {filename}")
+Informs the user about the path where the conntrack information is saved.
 
-        # Save the result to the file
-        save_to_file(filename, result)
+Script Summary:
+The script takes user input for source and destination IP addresses, constructs a filename based on these IPs, runs the conntrack command with the provided IPs, and saves the output to a file. The file is stored in /var/conntrack_sourceIP_destinationIP.capture.
 
-        print(f"Command executed. Output saved to {filename}")
-
-if __name__ == "__main__":
-    main()
-
-#The main function orchestrates the script execution by getting user input for source and destination IP addresses and providing a menu for various conntrack commands. It then constructs and executes the chosen conntrack command with user-provided parameters.
-
-#Script Summary: The script acts as a user-friendly interface for conntrack commands, allowing users to interactively select and execute various commands to inspect or manipulate connection tracking information. It prompts the user for source and destination IP addresses, provides a menu of conntrack commands, and executes the chosen command with additional parameters. The output is saved to a file for further analysis.
-
-#Purpose: The purpose of the script is to simplify the usage of conntrack commands for monitoring and managing connection tracking information. It provides an interactive and user-friendly way to perform various conntrack operations, allowing users to explore and analyze connection tracking data efficiently. The script facilitates customization of conntrack commands and helps users save the command output for future reference or analysis.
+Purpose:
+The purpose of the script is to provide a user-friendly interface to gather and save connection tracking information (conntrack) between a specified source and destination IP address. It simplifies the process of running conntrack commands and organizing the captured data in a file for later reference or analysis.
