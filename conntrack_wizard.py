@@ -39,7 +39,7 @@ def run_conntrack_command(conntrack_command, src_ip=None, dst_ip=None, output_di
         filename_placeholder += f"_dst-{dst_ip}"
     
     filename_placeholder = filename_placeholder.lstrip('_')
-    output_filename = f"{output_directory}/conntrack_{filename_placeholder}.capture"
+    output_filename = f"{output_directory}/conntrack_{filename_placeholder}.conntrackcap"
 
     command = ['conntrack', f'-{conntrack_command}']
 
