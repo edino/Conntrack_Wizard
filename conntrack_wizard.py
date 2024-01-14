@@ -12,9 +12,9 @@
 # It provides an interactive and user-friendly way to perform various conntrack operations, allowing users to explore and analyze connection tracking data efficiently.
 # The script facilitates customization of conntrack commands and helps users save the command output for future reference or analysis.
 
-# BuildDate: 10:33 PM EST 2024-01-13
+# BuildDate: 2:02 AM EST 2024-01-14
 
-# A simple way to execute this script is using the following command: curl -o /tmp/conntrack_wizard.py https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py && python3 /tmp/conntrack_wizard.py
+# A simple way to execute this script is using the following command: curl -sLo /tmp/conntrack_wizard.py https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py && python3 /tmp/conntrack_wizard.py
 
 # Another simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py | python3 -
 
@@ -22,6 +22,8 @@ import re
 import subprocess
 import threading
 import logging
+import os
+from datetime import datetime
 
 def validate_ip(ip):
     # Regular expression for a valid IP address
@@ -39,7 +41,13 @@ def validate_ip(ip):
         return False
 
 def configure_logging():
-    logging.basicConfig(filename='conntrack_wizard.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    log_filename = 'conntrack_wizard.log'
+    
+    if os.path.exists(log_filename):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_filename = f'conntrack_wizard_{timestamp}.log'
+
+    logging.basicConfig(filename=log_filename, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def log_info(message):
     print(message)
@@ -57,7 +65,7 @@ def get_user_input(prompt):
     except KeyboardInterrupt:
         return None
 
-def run_conntrack_command(conntrack_command, src_ip=None, dst_ip=None, output_directory="/var"):
+def run_conntrack_command(conntrack_command, src_ip=None, dst_ip=None, output_directory="/var", display_output=True):
     filename_placeholder = ""
     
     if src_ip:
@@ -67,6 +75,10 @@ def run_conntrack_command(conntrack_command, src_ip=None, dst_ip=None, output_di
     
     filename_placeholder = filename_placeholder.lstrip('_')
     output_filename = f"{output_directory}/conntrack_{filename_placeholder}.conntrackcap"
+
+    if os.path.exists(output_filename):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_filename = f'{output_directory}/conntrack_{filename_placeholder}_{timestamp}.conntrackcap'
 
     command = ['conntrack', f'-{conntrack_command}']
 
@@ -94,7 +106,8 @@ def run_conntrack_command(conntrack_command, src_ip=None, dst_ip=None, output_di
 
             # Read and print the output of the command
             for line in process.stdout:
-                print(line, end='')
+                if display_output:
+                    print(line, end='')
                 output_file.write(line)
 
             # Wait for the process to finish
@@ -148,8 +161,10 @@ def main():
             return
 
         output_directory = get_user_input("\nEnter the directory where the file will be saved (press Enter for default /var): ") or "/var"
+        
+        display_output = get_user_input("\nDo you want to display the output? (y/n): ").lower() == 'y'
 
-        run_conntrack_command(conntrack_command, src_ip, dst_ip, output_directory)
+        run_conntrack_command(conntrack_command, src_ip, dst_ip, output_directory, display_output)
 
     except KeyboardInterrupt:
         log_info("\nScript interrupted by user.")
