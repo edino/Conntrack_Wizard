@@ -7,68 +7,122 @@
 
 #Purpose: The purpose of the script is to simplify the usage of conntrack commands for monitoring and managing connection tracking information. It provides an interactive and user-friendly way to perform various conntrack operations, allowing users to explore and analyze connection tracking data efficiently. The script facilitates customization of conntrack commands and helps users save the command output for future reference or analysis.
 
-# BuildDate: 5:53 PM EST 2024-01-13
+# BuildDate: 10:18 PM EST 2024-01-13
 
 # A simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/TCPFlagsSender/main/conntrack_wizard.py | python3 -
 
+import re
 import subprocess
-import os
+import threading
 
-def execute_conntrack(command):
+def validate_ip(ip):
+    # Regular expression for a valid IP address
+    ip_regex = re.compile(r'^(\d{1,3}\.){3}\d{1,3}$')
+
+    # Check if the provided IP matches the regex
+    if ip_regex.match(ip):
+        # Further validate each octet
+        octets = ip.split('.')
+        for octet in octets:
+            if not 0 <= int(octet) <= 255:
+                return False
+        return True
+    else:
+        return False
+
+def run_conntrack_command(conntrack_command, src_ip=None, dst_ip=None, output_directory="/var"):
+    filename_placeholder = ""
+    
+    if src_ip:
+        filename_placeholder += f"_src-{src_ip}"
+    if dst_ip:
+        filename_placeholder += f"_dst-{dst_ip}"
+    
+    filename_placeholder = filename_placeholder.lstrip('_')
+    output_filename = f"{output_directory}/conntrack_{filename_placeholder}.capture"
+
+    command = ['conntrack', f'-{conntrack_command}']
+
+    if src_ip:
+        command.extend(['-s', src_ip])
+    if dst_ip:
+        command.extend(['-d', dst_ip])
+
     try:
-        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        return result.stdout
+        with open(output_filename, 'a') as output_file:
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            # Function to handle KeyboardInterrupt
+            def handle_interrupt():
+                try:
+                    process.communicate()
+                except KeyboardInterrupt:
+                    print("\nScript interrupted by user.")
+                    process.terminate()
+                    process.wait()
+
+            # Start the thread to check for KeyboardInterrupt
+            interrupt_thread = threading.Thread(target=handle_interrupt)
+            interrupt_thread.start()
+
+            # Read and print the output of the command
+            for line in process.stdout:
+                print(line, end='')
+                output_file.write(line)
+
+            # Wait for the process to finish
+            process.wait()
+
+            # Join the thread to ensure it has completed
+            interrupt_thread.join()
+
+            print(f"Command executed successfully. Output appended to {output_filename}")
+
     except subprocess.CalledProcessError as e:
-        return f"Error: {e.stderr}"
-
-def save_to_file(filename, content):
-    with open(filename, 'w') as file:
-        file.write(content)
-
-def get_user_input(prompt):
-    return input(prompt).strip()
+        print(f"Error executing command: {e}")
 
 def main():
-    # Get user input for source and destination IP addresses
-    src_ip = get_user_input("Enter source IP address: ")
-    dst_ip = get_user_input("Enter destination IP address: ")
+    conntrack_commands = {
+        'L': 'List connection tracking or expectation table',
+        'G': 'Search for and show a particular (matching) entry in the given table',
+        'D': 'Delete an entry from the given table',
+        'R': 'Reclaim conntrack',
+        'I': 'Create a new entry from the given table',
+        'U': 'Update an entry from the given table',
+        'E': 'Display a real-time event log',
+        'F': 'Flush the whole given table',
+        'C': 'Show the table counter',
+        'S': 'Show the in-kernel connection tracking system statistics',
+    }
 
-    # Construct the filename
-    filename = f"/var/conntrack_{src_ip}_{dst_ip}.capture"
+    print("Available conntrack commands:")
+    for key, value in conntrack_commands.items():
+        print(f"{key}: {value}")
 
-    while True:
-        # Conntrack menu
-        print("\nConntrack Menu:")
-        print("\n1. List conntrack or expectation table")
-        print("\n2. Get conntrack or expectation")
-        print("\n3. Delete conntrack or expectation")
-        print("\n4. Reclaim conntrack")
-        print("\n5. Create a conntrack or expectation")
-        print("\n6. Update a conntrack")
-        print("\n7. Show events")
-        print("\n8. Flush table")
-        print("\n9. Show counter")
-        print("\n10. Show statistics")
-        print("\n0. Exit")
+    try:
+        conntrack_command = input("Enter conntrack command: ").upper()
 
-        choice = get_user_input("Enter your choice (0-10): ")
+        if conntrack_command not in conntrack_commands:
+            print("\nInvalid conntrack command.")
+            return
 
-        if choice == '0':
-            break
+        src_ip = input("\nEnter source IP address (press Enter to skip): ")
+        dst_ip = input("\nEnter destination IP address (press Enter to skip): ")
 
-        # Get additional parameters/options based on the chosen command
-        additional_options = get_user_input("Enter additional parameters/options (if any): ")
+        if src_ip and not validate_ip(src_ip):
+            print("\nInvalid source IP address.")
+            return
+        if dst_ip and not validate_ip(dst_ip):
+            print("\nInvalid destination IP address.")
+            return
 
-        # Construct the Conntrack command
-        conntrack_command = f"conntrack -{choice} -s {src_ip} -d {dst_ip} {additional_options}"
+        output_directory = input("\nEnter the directory where the file will be saved (press Enter for default /var): ") or "/var"
 
-        # Execute Conntrack command
-        result = execute_conntrack(conntrack_command)
+        run_conntrack_command(conntrack_command, src_ip, dst_ip, output_directory)
 
-        # Save the result to the file
-        save_to_file(filename, result)
-
-        print(f"Command executed. Output saved to {filename}")
+    except KeyboardInterrupt:
+        print("\nScript interrupted by user.")
+        return
 
 if __name__ == "__main__":
     main()
