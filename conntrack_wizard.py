@@ -52,6 +52,8 @@ def get_user_input(prompt):
         return input(prompt)
     except EOFError:
         return None
+    except KeyboardInterrupt:
+        return None
 
 def run_conntrack_command(conntrack_command, src_ip=None, dst_ip=None, output_directory="/var"):
     filename_placeholder = ""
@@ -125,17 +127,13 @@ def main():
         log_info(f"{key}: {value}")
 
     try:
-        conntrack_command = get_user_input("\nEnter conntrack command: ")
-
-        if conntrack_command is None:
-            log_info("\nNo input provided. Exiting.")
-            return
-
-        conntrack_command = conntrack_command.upper()
-
-        if conntrack_command not in conntrack_commands:
-            log_error("\nInvalid conntrack command.")
-            return
+        conntrack_command = None
+        while conntrack_command not in conntrack_commands:
+            conntrack_command = get_user_input("\nEnter conntrack command: ")
+            if conntrack_command is None:
+                log_info("\nNo input provided. Exiting.")
+                return
+            conntrack_command = conntrack_command.upper()
 
         src_ip = get_user_input("\nEnter source IP address (press Enter to skip): ")
         dst_ip = get_user_input("\nEnter destination IP address (press Enter to skip): ")
