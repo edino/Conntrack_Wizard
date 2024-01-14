@@ -12,9 +12,11 @@
 # It provides an interactive and user-friendly way to perform various conntrack operations, allowing users to explore and analyze connection tracking data efficiently.
 # The script facilitates customization of conntrack commands and helps users save the command output for future reference or analysis.
 
-# BuildDate: 10:18 PM EST 2024-01-13
+# BuildDate: 10:33 PM EST 2024-01-13
 
-# A simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py | python3 -
+# A simple way to execute this script is using the following command: curl -o /tmp/conntrack_wizard.py https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py | python3 /tmp/conntrack_wizard.py
+
+# Another simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py | python3 -
 
 import re
 import subprocess
