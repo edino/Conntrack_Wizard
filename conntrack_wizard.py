@@ -9,7 +9,7 @@
 
 # BuildDate: 10:18 PM EST 2024-01-13
 
-# A simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/TCPFlagsSender/main/conntrack_wizard.py | python3 -
+# A simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py | python3 -
 
 import re
 import subprocess
