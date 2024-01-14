@@ -1,3 +1,25 @@
+# Copyright
+# Original author: Edino De Souza
+# Repository: https://github.com/edino/Conntrack_Wizard
+# License: GPL-3.0 license - https://github.com/edino/TCPFlagsSender/tree/main?tab=GPL-3.0-1-ov-file
+
+# Script Summary: The script acts as a user-friendly interface for conntrack commands,
+# allowing users to interactively select and execute various commands to inspect or manipulate connection tracking information.
+# It prompts the user for source and destination IP addresses, provides a menu of conntrack commands,
+# and executes the chosen command with additional parameters. The output is saved to a file for further analysis.
+
+# Purpose: The purpose of the script is to simplify the usage of conntrack commands for monitoring and managing connection tracking information.
+# It provides an interactive and user-friendly way to perform various conntrack operations, allowing users to explore and analyze connection tracking data efficiently.
+# The script facilitates customization of conntrack commands and helps users save the command output for future reference or analysis.
+
+# Please ensure you have the colorama library installed before running the script: pip install colorama
+
+# BuildDate: 11:19 PM EST 2024-01-13
+
+# A simple way to execute this script is using the following command: curl -o /tmp/conntrack_wizard_color.py https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard_color.py | python3 /tmp/conntrack_wizard_color.py
+
+# Another simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard_color.py | python3 -
+
 import subprocess
 from colorama import Fore, Style, init
 
