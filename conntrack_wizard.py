@@ -14,7 +14,7 @@
 
 # BuildDate: 10:33 PM EST 2024-01-13
 
-# A simple way to execute this script is using the following command: curl -o /tmp/conntrack_wizard.py https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py | python3 /tmp/conntrack_wizard.py
+# A simple way to execute this script is using the following command: curl -o /tmp/conntrack_wizard.py https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py && python3 /tmp/conntrack_wizard.py
 
 # Another simple way to execute this script is using the following command: curl -s https://raw.githubusercontent.com/edino/Conntrack_Wizard/main/conntrack_wizard.py | python3 -
 
